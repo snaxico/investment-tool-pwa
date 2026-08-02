@@ -18,12 +18,13 @@ test("service worker caches only the public shell", () => {
   assert.match(worker, /SHELL_URLS/);
   assert.match(worker, /config\.local\.js/);
   assert.match(worker, /google-auth\.mjs/);
+  assert.match(worker, /device-setup\.mjs/);
   assert.match(worker, /tracker-contract\.mjs/);
   assert.doesNotMatch(worker, /googleapis\.com|spreadsheets\/|snapshot_json|TRACKER_SPREADSHEET_ID/);
 });
 
 test("public PWA files contain no environment identifier or credential", () => {
-  const publicText = ["../index.html", "../app.js", "../manifest.webmanifest", "../sw.js", "../config.example.js"].map(read).join("\n");
+  const publicText = ["../index.html", "../app.js", "../manifest.webmanifest", "../sw.js", "../config.example.js", "../src/device-setup.mjs"].map(read).join("\n");
   assert.doesNotMatch(publicText, /AKfyc|AKfycb|client_secret|1nhd_xcKcuWqNwsudavhNRsm0kqy81Ujl/);
   assert.doesNotMatch(publicText, /NVDA-2026-08-02-v5\.1-slim|XNAS:NVDA/);
 });
@@ -43,6 +44,7 @@ test("PWA exposes install, refresh, filter, and ChatGPT entry points", () => {
   assert.match(html, /id="refresh"/);
   assert.match(html, /id="connect"/);
   assert.match(html, /id="settings-form"/);
+  assert.match(html, /id="copy-setup"/);
   assert.match(html, /accounts\.google\.com\/gsi\/client/);
   assert.match(html, /data-filter="BUY"/);
   assert.match(html, /manifest\.webmanifest/);

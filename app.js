@@ -1,5 +1,6 @@
 import { filterAndSortStocks, isStale, phaseLabel, phaseMeaning, safeHttpsUrl } from "./src/core.mjs";
 import { AuthorizationRequiredError, loadDetail, loadWatchlist, SetupRequiredError } from "./src/data-source.mjs";
+import { createPrivateSetupUrl, readPrivateSetupFromHash } from "./src/device-setup.mjs";
 import { GoogleAuthError, GoogleAuthSession } from "./src/google-auth.mjs";
 import { GoogleSheetsError, normalizeSpreadsheetId } from "./src/tracker-contract.mjs";
 
@@ -13,10 +14,12 @@ const els = {
   install: document.querySelector("#install"), analyze: document.querySelector("#analyze"), refresh: document.querySelector("#refresh"), connect: document.querySelector("#connect"),
   settings: document.querySelector("#settings"), settingsDialog: document.querySelector("#settings-dialog"), settingsForm: document.querySelector("#settings-form"),
   settingsClose: document.querySelector("#settings-close"), settingsError: document.querySelector("#settings-error"), disconnect: document.querySelector("#disconnect"),
+  copySetup: document.querySelector("#copy-setup"),
   clientId: document.querySelector("#google-client-id"), trackerReference: document.querySelector("#tracker-reference"), gptUrl: document.querySelector("#gpt-url"),
   sort: document.querySelector("#sort"), dialog: document.querySelector("#detail-dialog"), detail: document.querySelector("#detail")
 };
 let installPrompt = null;
+let setupImportResult = null;
 
 const esc = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
 const fmtDate = value => new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" }).format(new Date(value));
@@ -24,7 +27,29 @@ const fmtNumber = (value, digits = 2) => value == null ? "–" : new Intl.Number
 const badge = action => `<span class="badge ${esc(action)}">${esc(action)}</span>`;
 const starBox = (label, value, cls) => `<div class="starbox"><span>${label}</span><strong class="${cls}">${esc(value)}</strong></div>`;
 
+function normalizeDeviceConfig(config = {}) {
+  const googleClientId = String(config.googleClientId || "").trim();
+  const trackerSpreadsheetId = normalizeSpreadsheetId(config.trackerSpreadsheetId || config.trackerReference || "");
+  const gptUrl = String(config.gptUrl || "").trim();
+  if (!trackerSpreadsheetId) throw new Error("Bitte eine gültige Google-Sheets-URL oder Spreadsheet ID eingeben.");
+  if (gptUrl && !safeHttpsUrl(gptUrl)) throw new Error("Der Custom-GPT-Link muss eine gültige HTTPS-URL sein.");
+  new GoogleAuthSession(googleClientId);
+  return Object.freeze({ googleClientId, trackerSpreadsheetId, gptUrl });
+}
+
 async function loadConfig() {
+  const hasPrivateSetup = new URLSearchParams(location.hash.replace(/^#/, "")).has("setup");
+  if (hasPrivateSetup) {
+    try {
+      const imported = normalizeDeviceConfig(readPrivateSetupFromHash(location.hash));
+      localStorage.setItem(DEVICE_CONFIG_KEY, JSON.stringify(imported));
+      setupImportResult = { ok: true };
+    } catch (error) {
+      setupImportResult = { ok: false, message: error.message || String(error) };
+    } finally {
+      history.replaceState(null, "", `${location.pathname}${location.search}`);
+    }
+  }
   let fileConfig = {};
   try {
     const module = await import("./config.local.js");
@@ -173,14 +198,12 @@ async function connectGoogle() {
 async function saveDeviceSettings(event) {
   event.preventDefault();
   els.settingsError.hidden = true;
-  const googleClientId = els.clientId.value.trim();
-  const trackerSpreadsheetId = normalizeSpreadsheetId(els.trackerReference.value);
-  const gptUrl = els.gptUrl.value.trim();
   try {
-    if (!trackerSpreadsheetId) throw new Error("Bitte eine gültige Google-Sheets-URL oder Spreadsheet ID eingeben.");
-    if (gptUrl && !safeHttpsUrl(gptUrl)) throw new Error("Der Custom-GPT-Link muss eine gültige HTTPS-URL sein.");
-    new GoogleAuthSession(googleClientId);
-    const deviceConfig = { googleClientId, trackerSpreadsheetId, gptUrl };
+    const deviceConfig = normalizeDeviceConfig({
+      googleClientId: els.clientId.value,
+      trackerReference: els.trackerReference.value,
+      gptUrl: els.gptUrl.value
+    });
     localStorage.setItem(DEVICE_CONFIG_KEY, JSON.stringify(deviceConfig));
     state.config = Object.freeze(deviceConfig);
     configureAuth();
@@ -189,6 +212,24 @@ async function saveDeviceSettings(event) {
     updateConnection();
     showNotice('<strong>Gerätekonfiguration gespeichert.</strong> Klicke jetzt auf „Google verbinden“.');
     await refresh();
+  } catch (error) {
+    els.settingsError.textContent = error.message || String(error);
+    els.settingsError.hidden = false;
+  }
+}
+
+async function copyPrivateSetupLink() {
+  els.settingsError.hidden = true;
+  try {
+    const deviceConfig = normalizeDeviceConfig({
+      googleClientId: els.clientId.value,
+      trackerReference: els.trackerReference.value,
+      gptUrl: els.gptUrl.value
+    });
+    const url = createPrivateSetupUrl(location.href, deviceConfig);
+    await navigator.clipboard.writeText(url);
+    showNotice("<strong>Privater Einrichtungslink kopiert.</strong> Öffne ihn einmal auf einem anderen Gerät. Teile ihn nicht öffentlich.");
+    els.settingsDialog.close();
   } catch (error) {
     els.settingsError.textContent = error.message || String(error);
     els.settingsError.hidden = false;
@@ -206,6 +247,7 @@ els.connect.addEventListener("click", connectGoogle);
 els.settings.addEventListener("click", openSettings);
 els.settingsClose.addEventListener("click", () => els.settingsDialog.close());
 els.settingsForm.addEventListener("submit", saveDeviceSettings);
+els.copySetup.addEventListener("click", copyPrivateSetupLink);
 els.disconnect.addEventListener("click", async () => {
   state.authSession?.disconnect();
   state.accessToken = "";
@@ -233,4 +275,6 @@ configureAuth();
 els.analyze.disabled = !safeHttpsUrl(state.config.gptUrl);
 updateConnection();
 await refresh();
+if (setupImportResult?.ok) showNotice("<strong>Gerät automatisch eingerichtet.</strong> Tippe jetzt nur noch auf „Google verbinden“.");
+if (setupImportResult && !setupImportResult.ok) showNotice(`<strong>Einrichtungslink ungültig:</strong> ${esc(setupImportResult.message)}`);
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => {});

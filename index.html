@@ -75,9 +75,11 @@
         <input id="tracker-reference" name="trackerSpreadsheetId" inputmode="url" autocomplete="off" required placeholder="https://docs.google.com/spreadsheets/d/…/edit">
         <label for="gpt-url">Custom-GPT-Link <span class="muted">(optional)</span></label>
         <input id="gpt-url" name="gptUrl" inputmode="url" autocomplete="off" placeholder="https://chatgpt.com/g/…">
+        <p class="muted">Für ein weiteres Handy oder einen Browser kannst du einen privaten Einrichtungslink kopieren. Er enthält keine Passwörter oder OAuth-Token und wird nach dem Öffnen sofort aus der Adresszeile entfernt. Trotzdem nicht öffentlich teilen.</p>
         <div id="settings-error" class="form-error" role="alert" hidden></div>
         <div class="form-actions">
           <button id="disconnect" class="button ghost" type="button">Google trennen</button>
+          <button id="copy-setup" class="button ghost" type="button">Privaten Einrichtungslink kopieren</button>
           <button class="button primary" type="submit">Auf diesem Gerät speichern</button>
         </div>
       </form>
