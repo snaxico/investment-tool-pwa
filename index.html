@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data:; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://sheets.googleapis.com; frame-src https://accounts.google.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#080d19">
+    <meta name="referrer" content="no-referrer">
+    <meta name="description" content="Private Investment-Tool-Watchlist mit Analysehistorie und ChatGPT-Workflow.">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Investment Tool</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#watchlist">Zur Watchlist springen</a>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Speculative equities</div>
+          <h1>Investment Tool</h1>
+          <p class="subtitle">Was verdient jetzt Aufmerksamkeit?</p>
+        </div>
+        <div class="top-actions">
+          <span id="connection" class="connection" aria-live="polite">Wird geladen</span>
+          <button id="connect" class="button ghost" type="button">Google verbinden</button>
+          <button id="settings" class="button ghost" type="button" aria-label="Geräteeinstellungen">Einstellungen</button>
+          <button id="install" class="button ghost" type="button" hidden>App installieren</button>
+          <button id="analyze" class="button primary" type="button" disabled>In ChatGPT analysieren</button>
+        </div>
+      </header>
+
+      <section id="notice" class="notice" role="status" hidden></section>
+
+      <section class="toolbar" aria-label="Watchlist controls">
+        <div class="filters" role="group" aria-label="Action filter">
+          <button class="filter active" data-filter="ALL" type="button">Alle</button>
+          <button class="filter" data-filter="BUY" type="button">BUY</button>
+          <button class="filter" data-filter="WAIT" type="button">WAIT</button>
+          <button class="filter" data-filter="AVOID" type="button">AVOID</button>
+        </div>
+        <label class="sort-label" for="sort">Sortierung</label>
+        <select id="sort">
+          <option value="score">Score</option>
+          <option value="action">Action</option>
+          <option value="date">Neueste Analyse</option>
+          <option value="ticker">Ticker</option>
+        </select>
+        <button id="refresh" class="button ghost" type="button">Aktualisieren</button>
+      </section>
+
+      <section id="watchlist" class="grid" aria-label="Investment Watchlist">
+        <div class="state-card">Watchlist wird geladen …</div>
+      </section>
+    </main>
+
+    <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title">
+      <article id="detail" class="detail"></article>
+    </dialog>
+
+    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+      <form id="settings-form" class="settings-form">
+        <div class="row">
+          <div>
+            <div class="eyebrow">Nur auf diesem Gerät</div>
+            <h2 id="settings-title">Private Google-Verbindung</h2>
+          </div>
+          <button id="settings-close" class="close" type="button">Schließen</button>
+        </div>
+        <p class="muted">Die App speichert diese Kennungen lokal im Browser. OAuth-Token und Tracker-Inhalte werden nie dauerhaft gespeichert.</p>
+        <label for="google-client-id">Google Web OAuth Client ID</label>
+        <input id="google-client-id" name="googleClientId" inputmode="text" autocomplete="off" required placeholder="123…apps.googleusercontent.com">
+        <label for="tracker-reference">Tracker-URL oder Spreadsheet ID</label>
+        <input id="tracker-reference" name="trackerSpreadsheetId" inputmode="url" autocomplete="off" required placeholder="https://docs.google.com/spreadsheets/d/…/edit">
+        <label for="gpt-url">Custom-GPT-Link <span class="muted">(optional)</span></label>
+        <input id="gpt-url" name="gptUrl" inputmode="url" autocomplete="off" placeholder="https://chatgpt.com/g/…">
+        <div id="settings-error" class="form-error" role="alert" hidden></div>
+        <div class="form-actions">
+          <button id="disconnect" class="button ghost" type="button">Google trennen</button>
+          <button class="button primary" type="submit">Auf diesem Gerät speichern</button>
+        </div>
+      </form>
+    </dialog>
+
+    <noscript>Für das Investment Tool muss JavaScript aktiviert sein.</noscript>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

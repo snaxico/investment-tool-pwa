@@ -1,0 +1,13 @@
+# Never publish device configuration, credentials, tokens, or private data.
+config.local.js
+.env
+.env.*
+!.env.example
+analysis/
+credentials*.json
+client_secret*.json
+client-secret*.json
+token.json
+*.pem
+*.key
+.serve.pid
