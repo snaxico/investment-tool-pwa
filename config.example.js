@@ -3,6 +3,6 @@
 export default Object.freeze({
   googleClientId: "",
   trackerSpreadsheetId: "",
+  appsScriptDeploymentId: "",
   gptUrl: "",
-  appsScriptFallbackUrl: ""
 });

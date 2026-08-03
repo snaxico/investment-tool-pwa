@@ -1,7 +1,7 @@
 # Investment Tool PWA
 
-Static, installable client that will replace the Apps Script presentation layer after live-data
-parity and privacy checks pass. The existing private Apps Script app remains the working fallback.
+Static, installable client backed by the private Google Sheet. The existing private Apps Script app
+remains the working fallback.
 
 ## Current slice
 
@@ -16,16 +16,26 @@ parity and privacy checks pass. The existing private Apps Script app remains the
 - access tokens and private Tracker rows held only in memory;
 - device configuration kept out of source control;
 - private one-click setup links for additional phones and browsers.
+- stacked active analysis cards for each stock, with lazy loading of only the selected snapshot;
+- a simple performance block with base/bear observation dates, stock return, benchmark return, and
+  excess performance;
+- an Archive tab with search, 50-row paging, and restore (no permanent delete);
+- owner-triggered current-price refresh through the Apps Script Execution API;
+- an optional daily Apps Script update between 23:00 and 00:00 Europe/Berlin.
 
 The OAuth code path is complete. A Google Web OAuth Client must still be created/configured with the
 eventual GitHub Pages origin before the first live browser authorization and parity test.
 
 ## Local configuration
 
-Use **Einstellungen** in the PWA to save the Google Web OAuth Client ID, private Tracker URL/ID, and
-optional Custom-GPT link in that browser. A developer can alternatively copy `config.example.js` to
-`config.local.js` for an uncommitted local setup. The public bundle must never contain the Tracker ID,
-OAuth tokens, Apps Script deployment URLs, private snapshots, or credentials.
+Use **Einstellungen** in the PWA to save the Google Web OAuth Client ID, private Tracker URL/ID,
+private Apps Script API deployment ID, and optional Custom-GPT link in that browser. A developer can
+alternatively copy `config.example.js` to `config.local.js` for an uncommitted local setup. The public
+bundle must never contain real environment identifiers, OAuth tokens, private snapshots, or credentials.
+
+Normal reads request `spreadsheets.readonly`. The first explicit market update, archive/restore, or
+automatic-update change separately requests the full Sheets scope needed by the private Apps Script
+action. Tokens remain in memory and are discarded on disconnect or expiry.
 
 For another device, use **Privaten Einrichtungslink kopieren** in Settings. The configuration is
 encoded only in the URL fragment, which browsers do not send to GitHub Pages. The app imports it into
@@ -37,4 +47,4 @@ not passwords or tokens, but must still be shared only through a private channel
 The service worker caches only the static app shell and synthetic demo module. It ignores local
 configuration and does not intercept Google Identity, Sheets, or Apps Script requests. Private Tracker
 data and short-lived OAuth tokens stay in memory and are unavailable offline. The device stores only
-the non-secret OAuth Client ID, the private spreadsheet identifier, and the optional GPT URL.
+the non-secret OAuth Client ID, private spreadsheet and deployment identifiers, and optional GPT URL.

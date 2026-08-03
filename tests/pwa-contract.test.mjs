@@ -20,6 +20,7 @@ test("service worker caches only the public shell", () => {
   assert.match(worker, /google-auth\.mjs/);
   assert.match(worker, /device-setup\.mjs/);
   assert.match(worker, /tracker-contract\.mjs/);
+  assert.match(worker, /app-actions\.mjs/);
   assert.doesNotMatch(worker, /googleapis\.com|spreadsheets\/|snapshot_json|TRACKER_SPREADSHEET_ID/);
 });
 
@@ -35,6 +36,7 @@ test("public page applies a restrictive content security policy", () => {
   assert.match(html, /object-src 'none'/);
   assert.match(html, /base-uri 'none'/);
   assert.match(html, /https:\/\/sheets\.googleapis\.com/);
+  assert.match(html, /https:\/\/script\.googleapis\.com/);
 });
 
 test("PWA exposes install, refresh, filter, and ChatGPT entry points", () => {
@@ -45,6 +47,10 @@ test("PWA exposes install, refresh, filter, and ChatGPT entry points", () => {
   assert.match(html, /id="connect"/);
   assert.match(html, /id="settings-form"/);
   assert.match(html, /id="copy-setup"/);
+  assert.match(html, /id="apps-script-deployment-id"/);
+  assert.match(html, /id="auto-update"/);
+  assert.match(html, /data-view="ARCHIVE"/);
+  assert.match(html, /id="archive-list"/);
   assert.match(html, /accounts\.google\.com\/gsi\/client/);
   assert.match(html, /data-filter="BUY"/);
   assert.match(html, /manifest\.webmanifest/);

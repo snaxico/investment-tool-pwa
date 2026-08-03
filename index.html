@@ -2,7 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data:; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://sheets.googleapis.com; frame-src https://accounts.google.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data:; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://sheets.googleapis.com https://script.googleapis.com; frame-src https://accounts.google.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#080d19">
     <meta name="referrer" content="no-referrer">
@@ -33,25 +33,44 @@
 
       <section id="notice" class="notice" role="status" hidden></section>
 
-      <section class="toolbar" aria-label="Watchlist controls">
-        <div class="filters" role="group" aria-label="Action filter">
-          <button class="filter active" data-filter="ALL" type="button">Alle</button>
-          <button class="filter" data-filter="BUY" type="button">BUY</button>
-          <button class="filter" data-filter="WAIT" type="button">WAIT</button>
-          <button class="filter" data-filter="AVOID" type="button">AVOID</button>
-        </div>
-        <label class="sort-label" for="sort">Sortierung</label>
-        <select id="sort">
-          <option value="score">Score</option>
-          <option value="action">Action</option>
-          <option value="date">Neueste Analyse</option>
-          <option value="ticker">Ticker</option>
-        </select>
-        <button id="refresh" class="button ghost" type="button">Aktualisieren</button>
+      <nav class="view-tabs" aria-label="Bereiche">
+        <button class="view-tab active" type="button" data-view="WATCHLIST">Watchlist</button>
+        <button class="view-tab" type="button" data-view="ARCHIVE">Archiv</button>
+      </nav>
+
+      <section id="watchlist-view">
+        <section class="toolbar" aria-label="Watchlist controls">
+          <div class="filters" role="group" aria-label="Action filter">
+            <button class="filter active" data-filter="ALL" type="button">Alle</button>
+            <button class="filter" data-filter="BUY" type="button">BUY</button>
+            <button class="filter" data-filter="WAIT" type="button">WAIT</button>
+            <button class="filter" data-filter="AVOID" type="button">AVOID</button>
+          </div>
+          <label class="sort-label" for="sort">Sortierung</label>
+          <select id="sort">
+            <option value="score">Score</option>
+            <option value="action">Action</option>
+            <option value="date">Neueste Analyse</option>
+            <option value="ticker">Ticker</option>
+          </select>
+          <button id="auto-update" class="button ghost" type="button" aria-pressed="false" disabled>Automatisch: Aus</button>
+          <button id="refresh" class="button ghost" type="button">Aktualisieren</button>
+        </section>
+
+        <section id="watchlist" class="grid" aria-label="Investment Watchlist">
+          <div class="state-card">Watchlist wird geladen …</div>
+        </section>
       </section>
 
-      <section id="watchlist" class="grid" aria-label="Investment Watchlist">
-        <div class="state-card">Watchlist wird geladen …</div>
+      <section id="archive-view" hidden>
+        <section class="toolbar" aria-label="Archiv durchsuchen">
+          <label class="sr-only" for="archive-search">Archiv durchsuchen</label>
+          <input id="archive-search" class="search" type="search" placeholder="Archiv durchsuchen …" autocomplete="off">
+        </section>
+        <section id="archive-list" class="archive-list" aria-label="Archivierte Analysen">
+          <div class="state-card">Archiv wird geladen …</div>
+        </section>
+        <button id="archive-more" class="button ghost load-more" type="button" hidden>Weitere 50 laden</button>
       </section>
     </main>
 
@@ -73,6 +92,8 @@
         <input id="google-client-id" name="googleClientId" inputmode="text" autocomplete="off" required placeholder="123…apps.googleusercontent.com">
         <label for="tracker-reference">Tracker-URL oder Spreadsheet ID</label>
         <input id="tracker-reference" name="trackerSpreadsheetId" inputmode="url" autocomplete="off" required placeholder="https://docs.google.com/spreadsheets/d/…/edit">
+        <label for="apps-script-deployment-id">Apps-Script-Deployment-ID <span class="muted">(für Aktualisieren und Archiv)</span></label>
+        <input id="apps-script-deployment-id" name="appsScriptDeploymentId" inputmode="text" autocomplete="off" placeholder="AKfy…">
         <label for="gpt-url">Custom-GPT-Link <span class="muted">(optional)</span></label>
         <input id="gpt-url" name="gptUrl" inputmode="url" autocomplete="off" placeholder="https://chatgpt.com/g/…">
         <p class="muted">Für ein weiteres Handy oder einen Browser kannst du einen privaten Einrichtungslink kopieren. Er enthält keine Passwörter oder OAuth-Token und wird nach dem Öffnen sofort aus der Adresszeile entfernt. Trotzdem nicht öffentlich teilen.</p>

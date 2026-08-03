@@ -1,4 +1,5 @@
 export const SHEETS_READONLY_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
+export const SHEETS_WRITE_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
 export class GoogleAuthError extends Error {
   constructor(message) {
@@ -21,11 +22,12 @@ export async function waitForGoogleIdentity(windowRef = globalThis.window, timeo
 }
 
 export class GoogleAuthSession {
-  constructor(clientId, { windowRef = globalThis.window, now = () => Date.now() } = {}) {
+  constructor(clientId, { windowRef = globalThis.window, now = () => Date.now(), scope = SHEETS_READONLY_SCOPE } = {}) {
     if (!validClientId(clientId)) throw new GoogleAuthError("A valid Google Web OAuth Client ID is required.");
     this.clientId = clientId;
     this.windowRef = windowRef;
     this.now = now;
+    this.scope = scope;
     this.tokenClient = null;
     this.token = "";
     this.expiresAt = 0;
@@ -38,7 +40,7 @@ export class GoogleAuthSession {
     this.google = google;
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: this.clientId,
-      scope: SHEETS_READONLY_SCOPE,
+      scope: this.scope,
       include_granted_scopes: true,
       callback: response => this.handleResponse(response),
       error_callback: error => this.handleError(error)
@@ -89,5 +91,11 @@ export class GoogleAuthSession {
     if (this.token && this.google?.accounts?.oauth2?.revoke) this.google.accounts.oauth2.revoke(this.token, () => {});
     this.token = "";
     this.expiresAt = 0;
+  }
+}
+
+export class GoogleActionAuthSession extends GoogleAuthSession {
+  constructor(clientId, options = {}) {
+    super(clientId, { ...options, scope: SHEETS_WRITE_SCOPE });
   }
 }
