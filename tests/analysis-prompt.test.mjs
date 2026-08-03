@@ -19,6 +19,10 @@ test("builds the strict complete v5.1 analysis command", () => {
   assert.match(prompt, /schema v3\) is only the data contract/);
   assert.match(prompt, /MSCI_WORLD_EUR/);
   assert.match(prompt, /MSCI_WORLD_USD/);
+  assert.match(prompt, /begin Web Search immediately/);
+  assert.match(prompt, /free public sources/);
+  assert.match(prompt, /intraday quote/);
+  assert.match(prompt, /weekends or market holidays/);
   assert.match(prompt, /runInvestmentToolAnalysisAction succeeds in PREVIEW/);
   assert.match(prompt, /approval to save/);
 });
