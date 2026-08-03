@@ -12,15 +12,7 @@ test("rejects empty or unsafe ticker input", () => {
   assert.throws(() => normalizeAnalysisTicker("NVDA please"), /gültigen Ticker/);
 });
 
-test("builds the strict complete v5.1 analysis command", () => {
+test("builds the proven concise analysis command", () => {
   const prompt = buildFullAnalysisPrompt("nvda");
-  assert.match(prompt, /^FULL_ANALYSIS: NVDA/);
-  assert.match(prompt, /complete Investment Tool v5\.1-slim workflow now/);
-  assert.match(prompt, /first workflow action must be current Web Search/);
-  assert.match(prompt, /free public sources/);
-  assert.match(prompt, /Do not first acknowledge/);
-  assert.match(prompt, /every required schema-v3 field and calculation/);
-  assert.match(prompt, /validate and save the finished snapshot/);
-  assert.match(prompt, /Do not ask for a separate approval/);
-  assert.doesNotMatch(prompt, /PREVIEW|COMMIT/);
+  assert.equal(prompt, "Analyze NVDA based on the methodology and execute the work Flow.");
 });
