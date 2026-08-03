@@ -1,4 +1,4 @@
-const SETUP_VERSION = 1;
+const SETUP_VERSION = 2;
 const MAX_PAYLOAD_LENGTH = 8192;
 
 function toBase64Url(text) {
@@ -24,6 +24,7 @@ export function encodePrivateSetup(config) {
     version: SETUP_VERSION,
     googleClientId: String(config.googleClientId || "").trim(),
     trackerSpreadsheetId: String(config.trackerSpreadsheetId || "").trim(),
+    appsScriptDeploymentId: String(config.appsScriptDeploymentId || "").trim(),
     gptUrl: String(config.gptUrl || "").trim()
   };
   return toBase64Url(JSON.stringify(payload));
@@ -37,12 +38,13 @@ export function decodePrivateSetup(value) {
     if (error instanceof Error && error.message === "Der private Einrichtungslink ist ungültig.") throw error;
     throw new Error("Der private Einrichtungslink ist ungültig.");
   }
-  if (!payload || payload.version !== SETUP_VERSION || typeof payload.googleClientId !== "string" || typeof payload.trackerSpreadsheetId !== "string" || typeof payload.gptUrl !== "string") {
+  if (!payload || ![1, SETUP_VERSION].includes(payload.version) || typeof payload.googleClientId !== "string" || typeof payload.trackerSpreadsheetId !== "string" || typeof payload.gptUrl !== "string" || (payload.version === 2 && typeof payload.appsScriptDeploymentId !== "string")) {
     throw new Error("Der private Einrichtungslink wird von dieser App-Version nicht unterstützt.");
   }
   return Object.freeze({
     googleClientId: payload.googleClientId.trim(),
     trackerSpreadsheetId: payload.trackerSpreadsheetId.trim(),
+    appsScriptDeploymentId: String(payload.appsScriptDeploymentId || "").trim(),
     gptUrl: payload.gptUrl.trim()
   });
 }

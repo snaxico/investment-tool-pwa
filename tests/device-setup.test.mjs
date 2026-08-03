@@ -5,6 +5,7 @@ import { createPrivateSetupUrl, decodePrivateSetup, encodePrivateSetup, readPriv
 const config = {
   googleClientId: "12345678-example.apps.googleusercontent.com",
   trackerSpreadsheetId: "12345678901234567890",
+  appsScriptDeploymentId: "AKfycb12345678901234567890",
   gptUrl: "https://chatgpt.com/g/example"
 };
 
@@ -25,7 +26,7 @@ test("rejects malformed and unsupported setup payloads", () => {
   assert.throws(() => decodePrivateSetup("not-valid-base64"), /ungültig/);
   const unsupported = encodePrivateSetup(config);
   const decoded = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(unsupported.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(unsupported.length / 4) * 4, "=")), char => char.charCodeAt(0))));
-  decoded.version = 2;
+  decoded.version = 99;
   const value = btoa(JSON.stringify(decoded)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   assert.throws(() => decodePrivateSetup(value), /nicht unterstützt/);
 });

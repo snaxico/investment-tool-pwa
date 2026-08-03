@@ -51,10 +51,25 @@ export function demoDetail(instrumentId) {
     calculations: { risk_reward: { upside_pct: stock.riskReward * 12, downside_pct: 12, ratio: stock.riskReward } },
     sources: []
   };
+  const analysis = {
+    analysisId: `demo-${stock.ticker}`, analyzedAt, action: stock.action, score: stock.score,
+    priceZone: stock.priceZone, riskReward: stock.riskReward, referencePrice: stock.price,
+    stars: stock.stars, primaryCatalyst: stock.primaryCatalyst, keyRisk: stock.keyRisk,
+    watchItem: stock.watchItem, sentimentPhase: stock.sentimentPhase, snapshot,
+    trackRecord: {
+      action: stock.action, referencePrice: stock.price, referencePriceAt: analyzedAt,
+      bearValue: Number((stock.price * .8).toFixed(2)), baseValue: Number((stock.price * 1.25).toFixed(2)),
+      benchmarkId: stock.currency === "EUR" ? "MSCI_WORLD_EUR" : "MSCI_WORLD_USD",
+      baseFirstObservedAt: null, bearFirstObservedAt: null, primaryOutcome: "OPEN",
+      latestStockAt: analyzedAt, stockReturnPct: 6.4, benchmarkReturnPct: 3.1,
+      excessPerformancePp: 3.3, state: "ACTIVE", dataStatus: "OK"
+    }
+  };
   return {
     stock,
-    currentAnalysis: { analysisId: `demo-${stock.ticker}`, analyzedAt, action: stock.action, score: stock.score, priceZone: stock.priceZone, riskReward: stock.riskReward, referencePrice: stock.price, snapshot },
-    history: [{ analysisId: `demo-${stock.ticker}`, analyzedAt, action: stock.action, score: stock.score, priceZone: stock.priceZone, riskReward: stock.riskReward, referencePrice: stock.price }]
+    selectedAnalysis: analysis,
+    currentAnalysis: analysis,
+    activeHistory: [analysis],
+    history: [analysis]
   };
 }
-
