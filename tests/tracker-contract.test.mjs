@@ -23,7 +23,9 @@ const trackRecordRow = [
 const settings = [
   ["Key", "Value"], ["tracker_contract_version", "1.1.0"], ["active_methodology_version", "v5.1-slim"],
   ["active_schema_version", "3.0.0"], ["benchmark_provider_MSCI_WORLD_EUR", "AMS:IWDA"],
-  ["benchmark_provider_MSCI_WORLD_USD", "LON:IWDA"], ["automatic_market_update_enabled", "FALSE"]
+  ["benchmark_provider_MSCI_WORLD_USD", "LON:IWDA"], ["automatic_market_update_enabled", "TRUE"],
+  ["automatic_update_last_run_at", "2026-08-01T23:30:00Z"], ["automatic_update_last_status", "SUCCESS"],
+  ["automatic_update_last_summary", "4 Symbole aktualisiert; 0 fehlgeschlagen"]
 ];
 const valueRanges = [
   { values: [STOCKS_HEADERS, stockRow] },
@@ -48,6 +50,10 @@ test("validates, joins, and maps the live Tracker contract", () => {
   assert.equal(tracker.stocks[0].instrumentId, "XNAS:TEST");
   assert.equal(tracker.stocks[0].stars.sentiment, "☆");
   assert.equal(tracker.analyses[0].sheetRow, 2);
+  assert.equal(tracker.automaticUpdate.enabled, true);
+  assert.equal(tracker.automaticUpdate.status, "SUCCESS");
+  assert.equal(tracker.automaticUpdate.stale, false);
+  assert.match(tracker.automaticUpdate.summary, /4 Symbole/);
   const detail = buildStockDetail(tracker.stocks, tracker.analyses, tracker.trackRecords, "XNAS:TEST");
   assert.equal(detail.activeHistory.length, 1);
   assert.equal(detail.selectedAnalysis.trackRecord.excessPerformancePp, 10);
@@ -72,10 +78,22 @@ test("rejects an invalid automatic-update setting or duplicate analysis IDs", ()
   const invalidSetting = structuredClone(valueRanges);
   invalidSetting[2].values[6][1] = "MAYBE";
   assert.throws(() => parseTrackerRanges(invalidSetting), /automatic_market_update_enabled/);
+  const invalidHealth = structuredClone(valueRanges);
+  invalidHealth[2].values[8][1] = "MAYBE";
+  assert.throws(() => parseTrackerRanges(invalidHealth), /automatic_update_last_status/);
   const duplicate = structuredClone(valueRanges);
   duplicate[1].values.push([...analysisRow]);
   duplicate[3].values.push([...trackRecordRow]);
   assert.throws(() => parseTrackerRanges(duplicate), /duplicate analysis ID/);
+});
+
+test("marks an enabled automatic update stale when no recent success is recorded", () => {
+  const never = structuredClone(valueRanges);
+  never[2].values[7][1] = "";
+  never[2].values[8][1] = "NEVER";
+  const tracker = parseTrackerRanges(never, Date.parse("2026-08-03T12:00:00Z"));
+  assert.equal(tracker.automaticUpdate.stale, true);
+  assert.equal(tracker.automaticUpdate.lastRunAt, null);
 });
 
 test("uses one read-only, no-store Sheets batch request", async () => {

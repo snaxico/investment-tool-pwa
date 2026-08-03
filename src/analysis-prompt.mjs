@@ -12,26 +12,8 @@ export function buildFullAnalysisPrompt(value) {
   const ticker = normalizeAnalysisTicker(value);
   return `FULL_ANALYSIS: ${ticker}
 
-Execute the complete Investment Tool workflow using methodology v5.1-slim.
-
-ACTIVE VERSION RULE
-- Methodology v5.1-slim is the only active methodology.
-- Schema version 3.0.0 (schema v3) is only the data contract. Never interpret it as methodology v3.
-- Never use an older or archived methodology.
-
-This is not a company overview or a shortened analysis. Do not finish until:
-- you begin Web Search immediately and obtain current evidence yourself from free public sources;
-- you do not ask the user to supply public market data or return only a plan/data-unavailable refusal;
-- current research and reliable cited sources are complete;
-- every required schema-v3 field is populated, using JSON null only where permitted;
-- the benchmark is MSCI_WORLD_EUR for EUR or MSCI_WORLD_USD for USD;
-- relative performance, price zone, and risk/reward are calculated;
-- all three stars and BUY/WAIT/AVOID are assigned and explained;
-- bear/base values, catalyst, key risk, and watch item are complete;
-- the complete snapshot validates; and
-- runInvestmentToolAnalysisAction succeeds in PREVIEW.
-
-The reference price may be an intraday quote when timestamped. For weekends or market holidays, use the latest available prior close. Continue with null/N/A for optional unavailable fields where the schema permits; optional online discussion must never block the analysis.
-
-Only after showing the complete readable analysis and successful PREVIEW may you ask for approval to save it.`;
+Start the complete Investment Tool v5.1-slim workflow now.
+Your first workflow action must be current Web Search using free public sources.
+Do not first acknowledge this request, restate the workflow, provide a plan, ask me for public market data, or return a generic data-unavailable refusal.
+Complete every required schema-v3 field and calculation, validate and save the finished snapshot through the configured Action, then present the complete readable analysis with the real save result. Do not ask for a separate approval message.`;
 }

@@ -27,13 +27,20 @@ async function ensureTracker({ config, accessToken, force = false }) {
 }
 
 export async function loadWatchlist({ demo, config, accessToken }) {
-  if (demo) return { stocks: DEMO_STOCKS, updatedAt: new Date().toISOString(), mode: "DEMO", automaticUpdateEnabled: false };
+  if (demo) return {
+    stocks: DEMO_STOCKS,
+    updatedAt: new Date().toISOString(),
+    mode: "DEMO",
+    automaticUpdateEnabled: false,
+    automaticUpdateHealth: { enabled: false, status: "NEVER", lastRunAt: null, summary: "", stale: false }
+  };
   const tracker = await ensureTracker({ config, accessToken, force: true });
   return {
     stocks: tracker.stocks,
     updatedAt: new Date().toISOString(),
     mode: "LIVE",
-    automaticUpdateEnabled: String(tracker.settings.automatic_market_update_enabled || "FALSE").toUpperCase() === "TRUE"
+    automaticUpdateEnabled: tracker.automaticUpdate.enabled,
+    automaticUpdateHealth: tracker.automaticUpdate
   };
 }
 

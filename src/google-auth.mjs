@@ -1,5 +1,7 @@
 export const SHEETS_READONLY_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
 export const SHEETS_WRITE_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
+export const SCRIPT_PROJECT_SCOPE = "https://www.googleapis.com/auth/script.scriptapp";
+export const APPS_SCRIPT_ACTION_SCOPES = `${SHEETS_WRITE_SCOPE} ${SCRIPT_PROJECT_SCOPE}`;
 
 export class GoogleAuthError extends Error {
   constructor(message) {
@@ -96,6 +98,6 @@ export class GoogleAuthSession {
 
 export class GoogleActionAuthSession extends GoogleAuthSession {
   constructor(clientId, options = {}) {
-    super(clientId, { ...options, scope: SHEETS_WRITE_SCOPE });
+    super(clientId, { ...options, scope: APPS_SCRIPT_ACTION_SCOPES });
   }
 }
