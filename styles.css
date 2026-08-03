@@ -167,6 +167,7 @@ a { color: #93c5fd; }
 .settings-form label { margin-top: 8px; color: #dfe7f4; font-size: 13px; font-weight: 800; }
 .settings-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; color: var(--text); background: #0d1526; }
 .settings-form input::placeholder { color: #64748b; }
+.prompt-preview { width: 100%; min-height: 220px; resize: vertical; padding: 12px; border: 1px solid var(--line); border-radius: 12px; color: var(--text); background: #0d1526; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .form-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; }
 .form-error { padding: 10px 12px; border: 1px solid rgba(251,113,133,.45); border-radius: 10px; color: #fecdd3; background: rgba(76,5,25,.45); }
 
