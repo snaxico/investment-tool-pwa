@@ -15,14 +15,12 @@ test("rejects empty or unsafe ticker input", () => {
 test("builds the strict complete v5.1 analysis command", () => {
   const prompt = buildFullAnalysisPrompt("nvda");
   assert.match(prompt, /^FULL_ANALYSIS: NVDA/);
-  assert.match(prompt, /v5\.1-slim is the only active methodology/);
-  assert.match(prompt, /schema v3\) is only the data contract/);
-  assert.match(prompt, /MSCI_WORLD_EUR/);
-  assert.match(prompt, /MSCI_WORLD_USD/);
-  assert.match(prompt, /begin Web Search immediately/);
+  assert.match(prompt, /complete Investment Tool v5\.1-slim workflow now/);
+  assert.match(prompt, /first workflow action must be current Web Search/);
   assert.match(prompt, /free public sources/);
-  assert.match(prompt, /intraday quote/);
-  assert.match(prompt, /weekends or market holidays/);
-  assert.match(prompt, /runInvestmentToolAnalysisAction succeeds in PREVIEW/);
-  assert.match(prompt, /approval to save/);
+  assert.match(prompt, /Do not first acknowledge/);
+  assert.match(prompt, /every required schema-v3 field and calculation/);
+  assert.match(prompt, /validate and save the finished snapshot/);
+  assert.match(prompt, /Do not ask for a separate approval/);
+  assert.doesNotMatch(prompt, /PREVIEW|COMMIT/);
 });

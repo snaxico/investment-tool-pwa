@@ -11,13 +11,15 @@ const ARCHIVE_PAGE_SIZE = 50;
 const state = {
   stocks: [], archive: [], archiveVisible: ARCHIVE_PAGE_SIZE, archiveSearch: "", filter: "ALL", sort: "score",
   view: "WATCHLIST", config: {}, authSession: null, actionAuthSession: null, accessToken: "", actionAccessToken: "",
-  automaticUpdateEnabled: false, demo: new URLSearchParams(location.search).get("demo") === "1"
+  automaticUpdateEnabled: false,
+  automaticUpdateHealth: { enabled: false, status: "NEVER", lastRunAt: null, summary: "", stale: false },
+  demo: new URLSearchParams(location.search).get("demo") === "1"
 };
 const els = {
   grid: document.querySelector("#watchlist"), watchlistView: document.querySelector("#watchlist-view"), archiveView: document.querySelector("#archive-view"),
   archiveGrid: document.querySelector("#archive-list"), archiveSearch: document.querySelector("#archive-search"), archiveMore: document.querySelector("#archive-more"),
   notice: document.querySelector("#notice"), connection: document.querySelector("#connection"), install: document.querySelector("#install"),
-  analyze: document.querySelector("#analyze"), refresh: document.querySelector("#refresh"), autoUpdate: document.querySelector("#auto-update"), connect: document.querySelector("#connect"),
+  analyze: document.querySelector("#analyze"), refresh: document.querySelector("#refresh"), autoUpdate: document.querySelector("#auto-update"), autoUpdateHealth: document.querySelector("#auto-update-health"), connect: document.querySelector("#connect"),
   settings: document.querySelector("#settings"), settingsDialog: document.querySelector("#settings-dialog"), settingsForm: document.querySelector("#settings-form"),
   settingsClose: document.querySelector("#settings-close"), settingsError: document.querySelector("#settings-error"), disconnect: document.querySelector("#disconnect"),
   copySetup: document.querySelector("#copy-setup"), clientId: document.querySelector("#google-client-id"), trackerReference: document.querySelector("#tracker-reference"),
@@ -31,6 +33,7 @@ let setupImportResult = null;
 
 const esc = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
 const fmtDate = value => value ? new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" }).format(new Date(value)) : "–";
+const fmtDateTime = value => value ? new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Berlin" }).format(new Date(value)) : "–";
 const fmtNumber = (value, digits = 2) => value == null ? "–" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(value);
 const fmtSigned = (value, suffix = "%") => value == null ? "–" : `${value > 0 ? "+" : ""}${fmtNumber(value)}${suffix}`;
 const badge = action => `<span class="badge ${esc(action)}">${esc(action)}</span>`;
@@ -93,6 +96,27 @@ function openSettings() {
   els.settingsDialog.showModal();
 }
 
+function renderAutomaticUpdateHealth() {
+  const health = state.automaticUpdateHealth || {};
+  els.autoUpdateHealth.className = "auto-update-health muted";
+  if (!state.automaticUpdateEnabled) {
+    els.autoUpdateHealth.textContent = "Täglicher Lauf deaktiviert";
+    return;
+  }
+  if (health.status === "FAILED") {
+    els.autoUpdateHealth.classList.add("failed");
+    els.autoUpdateHealth.textContent = `Letzter automatischer Lauf fehlgeschlagen (${fmtDateTime(health.lastRunAt)})${health.summary ? ` · ${health.summary}` : ""}`;
+    return;
+  }
+  if (health.status !== "SUCCESS" || !health.lastRunAt) {
+    els.autoUpdateHealth.classList.add("stale");
+    els.autoUpdateHealth.textContent = "Automatik aktiv · noch kein erfolgreicher Lauf bestätigt";
+    return;
+  }
+  els.autoUpdateHealth.classList.add(health.stale ? "stale" : "success");
+  els.autoUpdateHealth.textContent = `Letzter automatischer Lauf: ${fmtDateTime(health.lastRunAt)}${health.summary ? ` · ${health.summary}` : ""}${health.stale ? " · überfällig" : ""}`;
+}
+
 function updateConnection() {
   const online = navigator.onLine; const connected = Boolean(state.accessToken);
   els.connection.className = `connection ${online && (state.demo || connected) ? "online" : online ? "" : "offline"}`;
@@ -102,6 +126,7 @@ function updateConnection() {
   els.autoUpdate.disabled = state.demo || !connected || !state.config.appsScriptDeploymentId;
   els.autoUpdate.textContent = `Automatisch: ${state.automaticUpdateEnabled ? "An" : "Aus"}`;
   els.autoUpdate.setAttribute("aria-pressed", String(state.automaticUpdateEnabled));
+  renderAutomaticUpdateHealth();
   if (!online) showNotice("<strong>Offline:</strong> Die App-Oberfläche ist verfügbar, private Tracker-Daten und Änderungen benötigen aber eine Verbindung.");
 }
 
@@ -242,7 +267,10 @@ async function refresh({ updateMarketData = false } = {}) {
       clearLiveTracker();
     }
     const result = await loadWatchlist({ demo: state.demo, config: state.config, accessToken: state.accessToken });
-    state.stocks = result.stocks; state.automaticUpdateEnabled = result.automaticUpdateEnabled; renderWatchlist(); updateConnection();
+    state.stocks = result.stocks;
+    state.automaticUpdateEnabled = result.automaticUpdateEnabled;
+    state.automaticUpdateHealth = result.automaticUpdateHealth;
+    renderWatchlist(); updateConnection();
     if (state.view === "ARCHIVE") await selectView("ARCHIVE");
     if (result.mode === "DEMO") showNotice('<strong>Lokaler Demo-Modus:</strong> Die angezeigten Firmen sind synthetisch.');
     if (result.mode === "LIVE") showNotice(`<strong>Private Live-Daten:</strong> ${state.stocks.length} Aktien direkt aus Google Sheets geladen.${updateMessage}`);
@@ -274,7 +302,7 @@ async function toggleAutomaticUpdate() {
     const enabled = !state.automaticUpdateEnabled;
     await runAction({ action: "SET_AUTOMATIC_UPDATE", enabled });
     clearLiveTracker(); await refresh();
-    showNotice(`<strong>Automatische Aktualisierung ${enabled ? "aktiviert" : "deaktiviert"}.</strong>${enabled ? " Der Lauf erfolgt täglich zwischen 23:00 und 00:00 Uhr (Europe/Berlin)." : ""}`);
+    showNotice(`<strong>Automatische Aktualisierung ${enabled ? "aktiviert" : "deaktiviert"}.</strong>${enabled ? " Der Lauf erfolgt täglich zwischen 23:00 und 00:00 Uhr (Europe/Berlin); die App muss dafür nicht geöffnet sein." : ""}`);
   } catch (error) { showNotice(`<strong>Automatik konnte nicht geändert werden:</strong> ${esc(error.message || error)}`); }
   finally { updateConnection(); }
 }

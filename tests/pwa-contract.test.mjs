@@ -49,6 +49,7 @@ test("PWA exposes install, refresh, filter, and ChatGPT entry points", () => {
   assert.match(html, /id="copy-setup"/);
   assert.match(html, /id="apps-script-deployment-id"/);
   assert.match(html, /id="auto-update"/);
+  assert.match(html, /id="auto-update-health"/);
   assert.match(html, /data-view="ARCHIVE"/);
   assert.match(html, /id="archive-list"/);
   assert.match(html, /accounts\.google\.com\/gsi\/client/);

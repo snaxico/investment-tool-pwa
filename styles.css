@@ -84,6 +84,9 @@ h1 { margin: 0; font-size: clamp(30px, 5vw, 44px); letter-spacing: -.045em; }
 .view-tab { min-height: 40px; padding: 8px 18px; border: 0; border-radius: 10px; color: var(--muted); background: transparent; font-weight: 850; }
 .view-tab.active { color: white; background: #263554; }
 .toolbar { margin-bottom: 18px; }
+.auto-update-health { flex-basis: 100%; font-size: 12px; }
+.auto-update-health.failed, .auto-update-health.stale { color: var(--red); font-weight: 800; }
+.auto-update-health.success { color: var(--green); }
 .filters { display: inline-flex; padding: 4px; border: 1px solid var(--line); border-radius: 999px; background: #0d1526; }
 .filter { min-height: 36px; padding: 7px 13px; border: 0; border-radius: 999px; color: var(--muted); background: transparent; }
 .filter.active { color: white; background: #263554; }

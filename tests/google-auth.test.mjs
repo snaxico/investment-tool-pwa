@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GoogleActionAuthSession, GoogleAuthError, GoogleAuthSession, SHEETS_READONLY_SCOPE, SHEETS_WRITE_SCOPE } from "../src/google-auth.mjs";
+import { APPS_SCRIPT_ACTION_SCOPES, GoogleActionAuthSession, GoogleAuthError, GoogleAuthSession, SHEETS_READONLY_SCOPE } from "../src/google-auth.mjs";
 
 test("rejects malformed OAuth client identifiers", () => {
   assert.throws(() => new GoogleAuthSession("secret"), GoogleAuthError);
@@ -23,7 +23,7 @@ test("requests only the Sheets read-only scope and retains the token in memory",
   assert.equal(session.getAccessToken(), "token");
 });
 
-test("requests the full Sheets scope only for user-triggered actions", async () => {
+test("requests the complete Apps Script execution scopes only for user-triggered actions", async () => {
   let clientConfig;
   const fakeWindow = {
     setTimeout,
@@ -36,5 +36,5 @@ test("requests the full Sheets scope only for user-triggered actions", async () 
   };
   const session = new GoogleActionAuthSession("123-example.apps.googleusercontent.com", { windowRef: fakeWindow, now: () => 1000 });
   assert.equal(await session.connect(), "write-token");
-  assert.equal(clientConfig.scope, SHEETS_WRITE_SCOPE);
+  assert.equal(clientConfig.scope, APPS_SCRIPT_ACTION_SCOPES);
 });

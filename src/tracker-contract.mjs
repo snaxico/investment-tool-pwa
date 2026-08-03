@@ -85,6 +85,23 @@ function isoOrNull(value) { return dateFromCell(value)?.toISOString() || null; }
 function numberOrNull(value) { if (value === "" || value == null) return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
 function normalizeStar(value) { return value === true || value === "★" ? "★" : "☆"; }
 
+function normalizeAutomaticUpdate(settings, nowMs) {
+  const enabled = String(settings.automatic_market_update_enabled || "FALSE").toUpperCase() === "TRUE";
+  const status = String(settings.automatic_update_last_status || "NEVER").toUpperCase();
+  if (!["NEVER", "SUCCESS", "FAILED"].includes(status)) {
+    throw new TrackerContractError("Tracker setting automatic_update_last_status must equal NEVER, SUCCESS, or FAILED.");
+  }
+  const lastRunAt = settings.automatic_update_last_run_at ? isoOrNull(settings.automatic_update_last_run_at) : null;
+  const stale = enabled && (!lastRunAt || nowMs - Date.parse(lastRunAt) > 36 * 60 * 60 * 1000);
+  return {
+    enabled,
+    status,
+    lastRunAt,
+    summary: String(settings.automatic_update_last_summary || ""),
+    stale
+  };
+}
+
 export function normalizeStockRows(values, nowMs = Date.now(), staleAfterDays = 90) {
   return rowsToObjects(values, STOCKS_HEADERS, "Stocks").map(row => {
     const analyzedAt = dateFromCell(row["Analysis date"]);
@@ -156,7 +173,14 @@ export function parseTrackerRanges(valueRanges, nowMs = Date.now()) {
   if (analysisIds.size !== analyses.length || analysisIds.has("")) throw new TrackerContractError("Analyses contains a missing or duplicate analysis ID.");
   if (trackRecordIds.size !== trackRecords.length || trackRecordIds.has("")) throw new TrackerContractError("TrackRecord contains a missing or duplicate analysis ID.");
   if (trackRecords.some(item => !analysisIds.has(item.analysisId))) throw new TrackerContractError("TrackRecord contains an unknown analysis ID.");
-  return { settings, staleAfterDays, stocks: normalizeStockRows(stockValues, nowMs, staleAfterDays), analyses, trackRecords };
+  return {
+    settings,
+    automaticUpdate: normalizeAutomaticUpdate(settings, nowMs),
+    staleAfterDays,
+    stocks: normalizeStockRows(stockValues, nowMs, staleAfterDays),
+    analyses,
+    trackRecords
+  };
 }
 
 export function buildStockDetail(stocks, analyses, trackRecords, instrumentId, selectedAnalysisId = "") {

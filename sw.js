@@ -1,4 +1,4 @@
-const CACHE_NAME = "investment-tool-shell-v0.5.3";
+const CACHE_NAME = "investment-tool-shell-v0.6.0";
 const SHELL_URLS = [
   "./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest",
   "./src/core.mjs", "./src/data-source.mjs", "./src/demo-data.mjs", "./src/device-setup.mjs",
