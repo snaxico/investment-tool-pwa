@@ -4,6 +4,7 @@ import { createPrivateSetupUrl, readPrivateSetupFromHash } from "./src/device-se
 import { AppsScriptActionError, normalizeDeploymentId, runAppsScriptAction } from "./src/app-actions.mjs";
 import { GoogleActionAuthSession, GoogleAuthError, GoogleAuthSession } from "./src/google-auth.mjs";
 import { GoogleSheetsError, normalizeSpreadsheetId } from "./src/tracker-contract.mjs";
+import { buildFullAnalysisPrompt, normalizeAnalysisTicker } from "./src/analysis-prompt.mjs";
 
 const DEVICE_CONFIG_KEY = "investment-tool.device-config.v2";
 const ARCHIVE_PAGE_SIZE = 50;
@@ -21,7 +22,9 @@ const els = {
   settingsClose: document.querySelector("#settings-close"), settingsError: document.querySelector("#settings-error"), disconnect: document.querySelector("#disconnect"),
   copySetup: document.querySelector("#copy-setup"), clientId: document.querySelector("#google-client-id"), trackerReference: document.querySelector("#tracker-reference"),
   deploymentId: document.querySelector("#apps-script-deployment-id"), gptUrl: document.querySelector("#gpt-url"), sort: document.querySelector("#sort"),
-  dialog: document.querySelector("#detail-dialog"), detail: document.querySelector("#detail")
+  dialog: document.querySelector("#detail-dialog"), detail: document.querySelector("#detail"), analysisDialog: document.querySelector("#analysis-dialog"),
+  analysisForm: document.querySelector("#analysis-form"), analysisClose: document.querySelector("#analysis-close"), analysisCancel: document.querySelector("#analysis-cancel"),
+  analysisTicker: document.querySelector("#analysis-ticker"), analysisError: document.querySelector("#analysis-error"), analysisPromptPreview: document.querySelector("#analysis-prompt-preview")
 };
 let installPrompt = null;
 let setupImportResult = null;
@@ -305,6 +308,40 @@ async function copyPrivateSetupLink() {
   } catch (error) { els.settingsError.textContent = error.message || String(error); els.settingsError.hidden = false; }
 }
 
+function openAnalysisPrompt() {
+  els.analysisForm.reset();
+  els.analysisError.hidden = true;
+  els.analysisPromptPreview.hidden = true;
+  els.analysisPromptPreview.value = "";
+  els.analysisDialog.showModal();
+  els.analysisTicker.focus();
+}
+
+async function startAnalysis(event) {
+  event.preventDefault();
+  els.analysisError.hidden = true;
+  els.analysisPromptPreview.hidden = true;
+  const url = safeHttpsUrl(state.config.gptUrl);
+  if (!url) { openSettings(); return; }
+  try {
+    const prompt = buildFullAnalysisPrompt(normalizeAnalysisTicker(els.analysisTicker.value));
+    const copyPromise = navigator.clipboard.writeText(prompt);
+    window.open(url, "_blank", "noopener,noreferrer");
+    await copyPromise;
+    els.analysisDialog.close();
+    showNotice("<strong>Vollständiger v5.1-Prompt kopiert.</strong> Füge ihn in ChatGPT ein und sende ihn ab.");
+  } catch (error) {
+    const prompt = (() => { try { return buildFullAnalysisPrompt(els.analysisTicker.value); } catch { return ""; } })();
+    if (prompt) {
+      els.analysisPromptPreview.value = prompt;
+      els.analysisPromptPreview.hidden = false;
+      els.analysisPromptPreview.select();
+    }
+    els.analysisError.textContent = prompt ? "Automatisches Kopieren war nicht möglich. Kopiere den markierten Auftrag manuell." : (error.message || String(error));
+    els.analysisError.hidden = false;
+  }
+}
+
 document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
   state.filter = button.dataset.filter; document.querySelectorAll("[data-filter]").forEach(item => item.classList.toggle("active", item === button)); renderWatchlist();
 }));
@@ -319,7 +356,11 @@ els.disconnect.addEventListener("click", async () => {
   state.authSession?.disconnect(); state.actionAuthSession?.disconnect(); state.accessToken = ""; state.actionAccessToken = ""; clearLiveTracker(); els.settingsDialog.close(); updateConnection(); await refresh();
 });
 els.dialog.addEventListener("click", event => { if (event.target === els.dialog) els.dialog.close(); });
-els.analyze.addEventListener("click", () => { const url = safeHttpsUrl(state.config.gptUrl); if (url) window.open(url, "_blank", "noopener,noreferrer"); });
+els.analyze.addEventListener("click", openAnalysisPrompt);
+els.analysisClose.addEventListener("click", () => els.analysisDialog.close());
+els.analysisCancel.addEventListener("click", () => els.analysisDialog.close());
+els.analysisDialog.addEventListener("click", event => { if (event.target === els.analysisDialog) els.analysisDialog.close(); });
+els.analysisForm.addEventListener("submit", startAnalysis);
 window.addEventListener("online", updateConnection); window.addEventListener("offline", updateConnection);
 window.addEventListener("beforeinstallprompt", event => { event.preventDefault(); installPrompt = event; els.install.hidden = false; });
 els.install.addEventListener("click", async () => { if (!installPrompt) return; await installPrompt.prompt(); installPrompt = null; els.install.hidden = true; });

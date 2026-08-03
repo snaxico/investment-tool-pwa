@@ -1,8 +1,8 @@
-const CACHE_NAME = "investment-tool-shell-v0.5.2";
+const CACHE_NAME = "investment-tool-shell-v0.5.3";
 const SHELL_URLS = [
   "./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest",
   "./src/core.mjs", "./src/data-source.mjs", "./src/demo-data.mjs", "./src/device-setup.mjs",
-  "./src/google-auth.mjs", "./src/tracker-contract.mjs", "./src/app-actions.mjs",
+  "./src/google-auth.mjs", "./src/tracker-contract.mjs", "./src/app-actions.mjs", "./src/analysis-prompt.mjs",
   "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png"
 ];
 

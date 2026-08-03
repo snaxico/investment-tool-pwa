@@ -106,6 +106,27 @@
       </form>
     </dialog>
 
+    <dialog id="analysis-dialog" class="settings-dialog" aria-labelledby="analysis-title">
+      <form id="analysis-form" class="settings-form">
+        <div class="row">
+          <div>
+            <div class="eyebrow">Methodology v5.1-slim</div>
+            <h2 id="analysis-title">Neue Analyse</h2>
+          </div>
+          <button id="analysis-close" class="close" type="button">Schließen</button>
+        </div>
+        <p class="muted">Gib nur den Ticker ein. Die App kopiert den vollständigen Analyseauftrag; füge ihn anschließend in ChatGPT ein und sende ihn ab.</p>
+        <label for="analysis-ticker">Ticker</label>
+        <input id="analysis-ticker" name="ticker" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="24" placeholder="NVDA">
+        <textarea id="analysis-prompt-preview" class="prompt-preview" readonly hidden aria-label="Vollständiger Analyseauftrag"></textarea>
+        <div id="analysis-error" class="form-error" role="alert" hidden></div>
+        <div class="form-actions">
+          <button id="analysis-cancel" class="button ghost" type="button">Abbrechen</button>
+          <button class="button primary" type="submit">Prompt kopieren &amp; GPT öffnen</button>
+        </div>
+      </form>
+    </dialog>
+
     <noscript>Für das Investment Tool muss JavaScript aktiviert sein.</noscript>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="module" src="./app.js"></script>
