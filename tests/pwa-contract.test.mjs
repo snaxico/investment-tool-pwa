@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID } from "../src/public-config.mjs";
+import { DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID, DEFAULT_GPT_URL } from "../src/public-config.mjs";
 
 const read = path => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 
@@ -28,6 +28,7 @@ test("service worker caches only the public shell", () => {
 test("public PWA files contain no environment identifier or credential", () => {
   const publicText = ["../index.html", "../app.js", "../manifest.webmanifest", "../sw.js", "../config.example.js", "../src/device-setup.mjs", "../src/public-config.mjs"].map(read).join("\n");
   assert.match(publicText, new RegExp(DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID));
+  assert.match(publicText, new RegExp(DEFAULT_GPT_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.doesNotMatch(publicText, /client_secret|1nhd_xcKcuWqNwsudavhNRsm0kqy81Ujl/);
   assert.doesNotMatch(publicText, /NVDA-2026-08-02-v5\.1-slim|XNAS:NVDA/);
 });

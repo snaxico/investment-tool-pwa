@@ -5,5 +5,5 @@ export default Object.freeze({
   googleClientId: "",
   trackerSpreadsheetId: "",
   appsScriptDeploymentId: "AKfycbz8040xuA1B5ewYSWJRjqXb15_GNJgSOgcQAfJyIQkr752DUXRdQgRII5q-L7wkqe0Y",
-  gptUrl: "",
+  gptUrl: "https://chatgpt.com/g/g-6a6f13d815708191872cf65dc660757a-investment-tool-analyst",
 });

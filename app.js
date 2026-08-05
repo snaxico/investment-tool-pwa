@@ -5,7 +5,7 @@ import { AppsScriptActionError, normalizeDeploymentId, runAppsScriptAction } fro
 import { GoogleActionAuthSession, GoogleAuthError, GoogleAuthSession } from "./src/google-auth.mjs";
 import { GoogleSheetsError, normalizeSpreadsheetId } from "./src/tracker-contract.mjs";
 import { buildFullAnalysisPrompt, normalizeAnalysisTicker } from "./src/analysis-prompt.mjs";
-import { DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID } from "./src/public-config.mjs";
+import { DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID, DEFAULT_GPT_URL } from "./src/public-config.mjs";
 
 const DEVICE_CONFIG_KEY = "investment-tool.device-config.v2";
 const ARCHIVE_PAGE_SIZE = 50;
@@ -79,7 +79,10 @@ async function loadConfig() {
   // Use the bundled production endpoint for every device. Only an explicit local developer
   // configuration may override it, so stale IDs saved by an older PWA cannot break Aktualisieren.
   const appsScriptDeploymentId = fileConfig.appsScriptDeploymentId || DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID;
-  return Object.freeze({ ...fileConfig, ...deviceConfig, appsScriptDeploymentId });
+  // Always open the current Custom GPT. This prevents an old share/editor URL on a phone from
+  // silently opening a normal ChatGPT chat without Web Search or the Investment Tool Action.
+  const gptUrl = fileConfig.gptUrl || DEFAULT_GPT_URL;
+  return Object.freeze({ ...fileConfig, ...deviceConfig, appsScriptDeploymentId, gptUrl });
 }
 
 function configureAuth() {

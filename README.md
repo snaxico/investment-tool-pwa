@@ -29,14 +29,15 @@ eventual GitHub Pages origin before the first live browser authorization and par
 
 ## Local configuration
 
-Use **Einstellungen** in the PWA to save the Google Web OAuth Client ID, private Tracker URL/ID,
-and optional Custom-GPT link in that browser. The current owner-only Apps Script deployment ID is
-bundled and prefilled automatically; stale IDs saved by older app versions are corrected on launch.
-It is an endpoint identifier, not a credential. A developer can
+Use **Einstellungen** in the PWA to save the Google Web OAuth Client ID and private Tracker URL/ID.
+The current owner-only Apps Script deployment ID and Custom GPT URL are bundled and prefilled
+automatically; stale values saved by older app versions are corrected on launch. The deployment ID
+is an endpoint identifier, not a credential. A developer can
 alternatively copy `config.example.js` to `config.local.js` for an uncommitted local setup. The public
 bundle must never contain a Tracker ID, OAuth token, private snapshot, or credential.
 
-If the Apps Script deployment is replaced, update `src/public-config.mjs` and publish the PWA again.
+If the Apps Script deployment or Custom GPT URL changes, update `src/public-config.mjs` and publish
+the PWA again.
 
 Normal reads request `spreadsheets.readonly`. The first explicit market update, archive/restore, or
 automatic-update change separately requests the full Sheets and Script-project scopes required by
