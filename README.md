@@ -31,7 +31,8 @@ eventual GitHub Pages origin before the first live browser authorization and par
 
 Use **Einstellungen** in the PWA to save the Google Web OAuth Client ID, private Tracker URL/ID,
 and optional Custom-GPT link in that browser. The current owner-only Apps Script deployment ID is
-bundled and prefilled automatically; it is an endpoint identifier, not a credential. A developer can
+bundled and prefilled automatically; stale IDs saved by older app versions are corrected on launch.
+It is an endpoint identifier, not a credential. A developer can
 alternatively copy `config.example.js` to `config.local.js` for an uncommitted local setup. The public
 bundle must never contain a Tracker ID, OAuth token, private snapshot, or credential.
 

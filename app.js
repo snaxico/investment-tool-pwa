@@ -76,7 +76,9 @@ async function loadConfig() {
   try { fileConfig = (await import("./config.local.js")).default || {}; } catch {}
   let deviceConfig = {};
   try { deviceConfig = JSON.parse(localStorage.getItem(DEVICE_CONFIG_KEY) || localStorage.getItem("investment-tool.device-config.v1") || "{}"); } catch {}
-  const appsScriptDeploymentId = deviceConfig.appsScriptDeploymentId || fileConfig.appsScriptDeploymentId || DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID;
+  // Use the bundled production endpoint for every device. Only an explicit local developer
+  // configuration may override it, so stale IDs saved by an older PWA cannot break Aktualisieren.
+  const appsScriptDeploymentId = fileConfig.appsScriptDeploymentId || DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID;
   return Object.freeze({ ...fileConfig, ...deviceConfig, appsScriptDeploymentId });
 }
 
