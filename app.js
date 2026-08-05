@@ -5,6 +5,7 @@ import { AppsScriptActionError, normalizeDeploymentId, runAppsScriptAction } fro
 import { GoogleActionAuthSession, GoogleAuthError, GoogleAuthSession } from "./src/google-auth.mjs";
 import { GoogleSheetsError, normalizeSpreadsheetId } from "./src/tracker-contract.mjs";
 import { buildFullAnalysisPrompt, normalizeAnalysisTicker } from "./src/analysis-prompt.mjs";
+import { DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID } from "./src/public-config.mjs";
 
 const DEVICE_CONFIG_KEY = "investment-tool.device-config.v2";
 const ARCHIVE_PAGE_SIZE = 50;
@@ -75,7 +76,8 @@ async function loadConfig() {
   try { fileConfig = (await import("./config.local.js")).default || {}; } catch {}
   let deviceConfig = {};
   try { deviceConfig = JSON.parse(localStorage.getItem(DEVICE_CONFIG_KEY) || localStorage.getItem("investment-tool.device-config.v1") || "{}"); } catch {}
-  return Object.freeze({ ...fileConfig, ...deviceConfig });
+  const appsScriptDeploymentId = deviceConfig.appsScriptDeploymentId || fileConfig.appsScriptDeploymentId || DEFAULT_APPS_SCRIPT_DEPLOYMENT_ID;
+  return Object.freeze({ ...fileConfig, ...deviceConfig, appsScriptDeploymentId });
 }
 
 function configureAuth() {

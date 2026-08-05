@@ -1,8 +1,9 @@
 // Optional developer-only configuration. The normal PWA setup screen stores these identifiers
-// on the current device. Never commit real Tracker IDs, OAuth tokens, deployment URLs, or snapshots.
+// on the current device. The owner-only deployment ID is prefilled by the public app; never
+// commit Tracker IDs, OAuth tokens, deployment URLs, or snapshots.
 export default Object.freeze({
   googleClientId: "",
   trackerSpreadsheetId: "",
-  appsScriptDeploymentId: "",
+  appsScriptDeploymentId: "AKfycbz8040xuA1B5ewYSWJRjqXb15_GNJgSOgcQAfJyIQkr752DUXRdQgRII5q-L7wkqe0Y",
   gptUrl: "",
 });
