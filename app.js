@@ -185,7 +185,7 @@ function performancePanel(track, currency) {
       <div><span>Benchmark return</span><strong>${fmtSigned(track.benchmarkReturnPct)}</strong></div>
       <div><span>Excess performance</span><strong>${fmtSigned(track.excessPerformancePp, " pp")}</strong></div>
     </div>
-    <div class="muted performance-note">${esc(track.benchmarkId)} · Stand ${fmtDate(endAt)}${track.dataStatus !== "OK" ? ` · ${esc(track.dataStatus)}` : ""}</div>
+    <div class="muted performance-note">${esc(track.benchmarkId)} · Benchmarkwert: ${fmtDateTime(track.benchmarkStartAt)} · Stand ${fmtDate(endAt)}</div>
   </div>`;
 }
 
