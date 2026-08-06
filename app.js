@@ -360,11 +360,21 @@ async function startAnalysis(event) {
   if (!url) { openSettings(); return; }
   try {
     const prompt = buildFullAnalysisPrompt(normalizeAnalysisTicker(els.analysisTicker.value));
-    const copyPromise = navigator.clipboard.writeText(prompt);
-    window.open(url, "_blank", "noopener,noreferrer");
-    await copyPromise;
-    els.analysisDialog.close();
-    showNotice("<strong>Vollständiger v5.1-Prompt kopiert.</strong> Füge ihn in ChatGPT ein und sende ihn ab.");
+    // Navigating straight to chatgpt.com from the installed PWA is claimed by the native
+    // ChatGPT app (iOS Universal Links / Android App Links), and the Investment Tool Action
+    // does not fire there. App-link interception is not applied to redirects, so hop through
+    // the same-origin gpt.html to keep the Custom GPT in a real browser tab.
+    const target = new URL(url);
+    target.searchParams.set("q", prompt);
+    const hop = new URL("gpt.html", location.href);
+    hop.searchParams.set("u", target.toString());
+    // Must stay inside the user gesture or mobile popup blocking eats it, so open first
+    // and treat the clipboard as best effort afterwards.
+    window.open(hop.toString(), "_blank", "noopener");
+    els.analysisPromptPreview.value = prompt;
+    els.analysisPromptPreview.hidden = false;
+    navigator.clipboard.writeText(prompt).catch(() => {});
+    showNotice("<strong>Prompt an ChatGPT übergeben.</strong> Ist er dort nicht vorausgefüllt, kopiere ihn aus dem Feld unten.");
   } catch (error) {
     const prompt = (() => { try { return buildFullAnalysisPrompt(els.analysisTicker.value); } catch { return ""; } })();
     if (prompt) {

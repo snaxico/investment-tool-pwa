@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChatGPT wird geöffnet…</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #080d19; color: #e6ecff;
+         display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1.5rem; }
+  main { max-width: 32rem; text-align: center; }
+  a { color: #8fb4ff; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <p id="status">ChatGPT wird im Browser geöffnet…</p>
+  <p id="manual" hidden>Falls nichts passiert: <a id="link" href="#">hier tippen</a>.</p>
+</main>
+<script>
+  // Bounce page. Opening https://chatgpt.com/... directly from the installed PWA
+  // is claimed by the ChatGPT native app (iOS Universal Links / Android App Links),
+  // and GPT Actions do not fire reliably inside that app. App-link interception is
+  // only applied to direct navigations, not to redirects, so hopping through this
+  // same-origin page keeps the Custom GPT in a real browser tab.
+  (function () {
+    var target = new URLSearchParams(location.search).get("u") || "";
+    var allowed = /^https:\/\/(chatgpt\.com|chat\.openai\.com)\//.test(target);
+    if (!allowed) {
+      document.getElementById("status").textContent =
+        "Ungültiges Ziel. Bitte den Custom-GPT-Link in den Einstellungen prüfen.";
+      return;
+    }
+    var link = document.getElementById("link");
+    link.href = target;
+    document.getElementById("manual").hidden = false;
+    location.replace(target);
+  })();
+</script>
+</body>
+</html>
